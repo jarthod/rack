@@ -27,16 +27,14 @@ module Rack
     # should not be removed. The whitespace creates paragraphs in the RDoc
     # output.
     #
-    ## This specification aims to formalize the Rack protocol. You
-    ## can (and should) use Rack::Lint to enforce it.
+    ## = Rack Specification
     ##
-    ## When you develop middleware, be sure to add a Lint before and
-    ## after to catch all mistakes.
+    ## This specification aims to formalize the Rack protocol. You can (and should) use +Rack::Lint+ to enforce
+    ## it. When you develop middleware, be sure to add a Lint before and after to catch all mistakes.
     ##
-    ## = Rack applications
+    ## == The Rack Application
     ##
-    ## A Rack application is a Ruby object (not a class) that
-    ## responds to +call+.
+    ## A Rack application is a Ruby object that responds to +call+.
     def call(env = nil)
       Wrapper.new(@app, env).response
     end
@@ -99,72 +97,50 @@ module Rack
       ## == The Environment
       ##
       def check_environment(env)
-        ## The environment must be an unfrozen instance of Hash that includes
-        ## CGI-like headers. The Rack application is free to modify the
-        ## environment.
+        ## The environment must be an unfrozen instance of Hash that includes CGI-like headers. The Rack application is
+        ## free to modify the environment.
         raise LintError, "env #{env.inspect} is not a Hash, but #{env.class}" unless env.kind_of? Hash
         raise LintError, "env should not be frozen, but is" if env.frozen?
 
         ##
-        ## The environment is required to include these variables
-        ## (adopted from {PEP 333}[https://peps.python.org/pep-0333/]), except when they'd be empty, but see
-        ## below.
+        ## The environment is required to include these variables (adopted from {The Common Gateway Interface (CGI)}
+        ## [https://datatracker.ietf.org/doc/html/rfc3875]), except when they'd be empty, but see below.
 
-        ## <tt>REQUEST_METHOD</tt>:: The HTTP request method, such as
-        ##                           "GET" or "POST". This cannot ever
-        ##                           be an empty string, and so is
-        ##                           always required.
+        ## === +REQUEST_METHOD+
+        ## The HTTP request method, such as "GET" or "POST". This cannot ever be an empty string, and so is always
+        ## required.
 
-        ## <tt>SCRIPT_NAME</tt>:: The initial portion of the request
-        ##                        URL's "path" that corresponds to the
-        ##                        application object, so that the
-        ##                        application knows its virtual
-        ##                        "location". This may be an empty
-        ##                        string, if the application corresponds
-        ##                        to the "root" of the server.
+        ## === +SCRIPT_NAME+
+        ## The initial portion of the request URL's "path" that corresponds to the application object, so that the
+        ## application knows its virtual "location". This may be an empty string, if the application corresponds to the
+        ## "root" of the server.
 
-        ## <tt>PATH_INFO</tt>:: The remainder of the request URL's
-        ##                      "path", designating the virtual
-        ##                      "location" of the request's target
-        ##                      within the application. This may be an
-        ##                      empty string, if the request URL targets
-        ##                      the application root and does not have a
-        ##                      trailing slash. This value may be
-        ##                      percent-encoded when originating from
-        ##                      a URL.
+        ## === +PATH_INFO+
+        ## The remainder of the request URL's "path", designating the virtual "location" of the request's target within
+        ## the application. This may be an empty string, if the request URL targets the application root and does not
+        ## have a trailing slash. This value may be percent-encoded when originating from a URL.
 
-        ## <tt>QUERY_STRING</tt>:: The portion of the request URL that
-        ##                         follows the <tt>?</tt>, if any. May be
-        ##                         empty, but is always required!
+        ## === +QUERY_STRING+
+        ## The portion of the request URL that follows the <tt>?</tt>, if any. May be empty, but is always required!
 
-        ## <tt>SERVER_NAME</tt>:: When combined with <tt>SCRIPT_NAME</tt> and
-        ##                        <tt>PATH_INFO</tt>, these variables can be
-        ##                        used to complete the URL. Note, however,
-        ##                        that <tt>HTTP_HOST</tt>, if present,
-        ##                        should be used in preference to
-        ##                        <tt>SERVER_NAME</tt> for reconstructing
-        ##                        the request URL.
-        ##                        <tt>SERVER_NAME</tt> can never be an empty
-        ##                        string, and so is always required.
+        ## === +SERVER_NAME+
+        ## When combined with <tt>SCRIPT_NAME</tt> and <tt>PATH_INFO</tt>, these variables can be used to complete the
+        ## URL. Note, however, that <tt>HTTP_HOST</tt>, if present, should be used in preference to
+        ## <tt>SERVER_NAME</tt> for reconstructing the request URL. <tt>SERVER_NAME</tt> can never be an empty string,
+        ## and so is always required.
 
-        ## <tt>SERVER_PORT</tt>:: An optional +Integer+ which is the port the
-        ##                        server is running on. Should be specified if
-        ##                        the server is running on a non-standard port.
+        ## === +SERVER_PORT+
+        ## An optional +Integer+ which is the port the server is running on. Should be specified if the server is
+        ## running on a non-standard port.
 
-        ## <tt>SERVER_PROTOCOL</tt>:: A string representing the HTTP version used
-        ##                            for the request.
+        ## === +SERVER_PROTOCOL+
+        ## A string representing the HTTP version used for the request.
 
-        ## <tt>HTTP_</tt> Variables:: Variables corresponding to the
-        ##                            client-supplied HTTP request
-        ##                            headers (i.e., variables whose
-        ##                            names begin with <tt>HTTP_</tt>). The
-        ##                            presence or absence of these
-        ##                            variables should correspond with
-        ##                            the presence or absence of the
-        ##                            appropriate HTTP header in the
-        ##                            request. See
-        ##                            {RFC3875 section 4.1.18}[https://tools.ietf.org/html/rfc3875#section-4.1.18]
-        ##                            for specific behavior.
+        ## === +HTTP_+ Variables
+        ## Variables corresponding to the client-supplied HTTP request headers (i.e., variables whose names begin with
+        ## <tt>HTTP_</tt>). The presence or absence of these variables should correspond with the presence or absence
+        ## of the appropriate HTTP header in the request. See {RFC3875 section 4.1.18}
+        ## [https://tools.ietf.org/html/rfc3875#section-4.1.18] for specific behavior.
 
         ## In addition to this, the Rack environment must include these
         ## Rack-specific variables:
